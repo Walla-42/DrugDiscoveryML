@@ -104,18 +104,25 @@
 
 ### Prerequisites
 
-1. Before you can run the program make sure you have an updated version of Python3 and BioPython installed on your system.
+1. Before you can run the program make sure you have an updated version of Python3 and the following packages installed on your system:
+  -  Scikit-learn
+  -  Pandas
+  -  Numpy
+  -  rdkit
+  -  seaborn
+  -  matplotlib
+  -  chembl webresource client
+  -  lazypredict 
 
+    pip install scikit-learn chembl_webresource_client pandas matplotlib seaborn rdkit lazypredict
 
-    ```sh
-    pip install scikit-learn chembl_webclient pandas matplotlib seaborn 
-    ```
+  The program will take care of this for you if you dont already have these dependencies on your system. 
 
 ### Installation
 
 1. Clone the repository
    ```sh
-   git clone https://github.com/walla-42/Gene_Search.git
+   git clone https://github.com/walla-42/DrugDiscoveryML.git
    ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p> 
