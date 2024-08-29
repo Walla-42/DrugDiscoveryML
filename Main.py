@@ -7,13 +7,14 @@ from chembl_webresource_client.new_client import new_client
 from rdkit.Chem import Lipinski, Descriptors
 from rdkit import Chem
 from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestRegressor
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.metrics import r2_score, mean_squared_error
 import lazypredict
 from collections import Counter
 from lazypredict.Supervised import LazyRegressor
 import  os
+from sklearn.tree import DecisionTreeRegressor
 
 def model_scoring(y_test, y_pred):
     """ Calculates the statistics necessary to score a ML models performance
@@ -302,9 +303,6 @@ Y_pred = model.predict(X_test)
 # print(Y_pred.shape)
 
 # Lets establish a different model that performed better in our model analysis:
-from sklearn.ensemble import GradientBoostingRegressor
-from sklearn.metrics import mean_squared_error
-from sklearn.metrics import r2_score
 model2 = GradientBoostingRegressor(random_state=random, n_estimators=100)
 model2.fit(X_train, y_train)
 y2_pred = model2.predict(X_test)
@@ -317,6 +315,14 @@ MSE = float(mean_squared_error(y_test, Y_pred))
 r2 = float(r2_score(y_test, Y_pred))
 print(f"MSE: {MSE:.2f}, R2: {r2:.2f}")
 
+
+
+model3 = DecisionTreeRegressor(random_state=random)
+model3.fit(X_train, y_train)
+y3_pred = model3.predict(X_test)
+MSE3 = mean_squared_error(y_test, y3_pred)
+r23 = r2_score(y_test, y3_pred)
+print(f"MSE: {MSE3:.2f}, R2: {r23:.2f}")
 
 # Create visual of true values vs predicted values to visualize linear coorilation. 
 sns.set(color_codes=True)

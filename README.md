@@ -31,7 +31,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/walla-42/DrugDiscoveryML">
-    <img src="Images/DrugDiscovery.png" alt="Logo" width="600" height="200">
+    <img src="Images/DrugDiscovery.png" alt="Logo" width="1000" height="200">
   </a>
 
 <h3 align="center>Drug Discovery Model</h3>
@@ -113,9 +113,9 @@
   -  matplotlib
   -  chembl webresource client
   -  lazypredict 
-
-    pip install scikit-learn chembl_webresource_client pandas matplotlib seaborn rdkit lazypredict
-
+  ```sh
+      pip install scikit-learn chembl_webresource_client pandas matplotlib seaborn rdkit lazypredict
+  ```
   The program will take care of this for you if you dont already have these dependencies on your system. 
 
 ### Installation
