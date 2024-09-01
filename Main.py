@@ -362,9 +362,13 @@ df_selection = df_final[selection]
 df_selection.to_csv(os.path.join(new_folder, f'{query}_{selected_target}_molecule.smi'), sep='\t', \
                     index=False, header=False)
 
+PaDEL_dir = os.path.join(master_dir, 'PaDEL-Descriptor')
+print(f'This is the PaDEL Dir: {PaDEL_dir}')
+os.makedirs(PaDEL_dir) 
+
 # Export path directory to .txt document to be read in by our BASH file which will run the PaDEL program
-# with open(os.path.join('./PaDEL-Descriptor', 'output_dir.txt'), 'w') as f:
-#     f.write(new_folder)
+with open(os.path.join(PaDEL_dir, 'output_dir.txt'), 'w') as f:
+    f.write(new_folder)
 
 
 # Run the Bash script
