@@ -91,7 +91,8 @@
 ### Built With
 
 * [![Python][Python.js]][Python-url]
-* [![Bash][Bash.js]][Bash-url]
+* [![Shell Script][ShellScript.js]][ShellScript-url]
+* [![Padel][Padel.js]][Padel-url]
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -244,3 +245,7 @@ Project Link: [https://github.com/walla-42/DrugDiscoveryML](https://github.com/w
 [Python-url]: https://www.python.org/
 [SQlite.js]: https://img.shields.io/badge/sqlite-%2307405e.svg?style=for-the-badge&logo=sqlite&logoColor=white
 [SQlite-url]: https://www.sqlite.org
+[ShellScript.js]: https://img.shields.io/badge/shell_script-%23121011.svg?style=for-the-badge&logo=gnu-bash&logoColor=white
+[ShellScript-url]: https://www.learnshell.org/
+[Padel.js]:https://img.shields.io/badge/-PaDEL_Descriptor-black.svg?style=for-the-badge&colorB=blue
+[padel-url]: http://www.yapcwsoft.com/dd/padeldescriptor/
