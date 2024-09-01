@@ -14,7 +14,10 @@ from sklearn.metrics import r2_score, mean_squared_error
 from collections import Counter
 # from lazypredict.Supervised import LazyRegressor
 import  os
+import subprocess
 from sklearn.tree import DecisionTreeRegressor
+
+master_dir = os.getcwd()
 
 def model_scoring(y_test, y_pred):
     """Calculates the statistics necessary to score a ML models performance
@@ -149,13 +152,13 @@ def norm_value(input):
 target = new_client.target
 
 # query = input('Target query:')
-query = 'Acetylcholinesterase'
+query = 'Coronavirus'
 target_query = target.search(query)
 targets = pd.DataFrame.from_dict(target_query)
 print(targets)
 
 # selected_target = targets.target_chembl_id[int(input('Select Target Index:)'))]
-selected_target = targets.target_chembl_id[0]
+selected_target = targets.target_chembl_id[6]
 # print(selected_target)
 
 # Select target protein
@@ -164,10 +167,19 @@ res = activity.filter(target_chembl_id=selected_target).filter(standard_type='IC
 df = pd.DataFrame.from_dict(res)
 # print(df)
 
+# Create folder to separate created files from program files
+start_folder_dir = os.path.join(os.getcwd(), 'DiscoveryFiles')
+try:
+    os.makedirs(start_folder_dir)
+    os.chdir(start_folder_dir)
+    print(os.getcwd())
+except FileExistsError:
+    os.chdir(start_folder_dir)
+    print(os.getcwd())
+
+# Create folder to house search results
 current_directory = os.getcwd()
 new_folder = os.path.join(current_directory, f'{query}_{selected_target}_drug_discovery')
-
-# Create the folder
 for i in range(11):
     try:
         if i == 0:
@@ -293,6 +305,7 @@ plt.figure(figsize=(5.5,5.5))
 sns.countplot(x='bioactivity_class', data=df_2_class, edgecolor='black', hue='bioactivity_class')
 plt.xlabel('Bioactivity Class', fontsize=14, fontweight='bold')
 plt.ylabel('Frequency', fontsize=14, fontweight='bold')
+plt.tight_layout()
 plt.show()
 plt.savefig(os.path.join(new_folder, f'{query}_plot_bioactivity_class.pdf'))
 
@@ -302,6 +315,7 @@ sns.scatterplot(x='MW', y='LogP', size='pIC50', data=df_2_class, edgecolor='blac
 plt.xlabel('Molecular Weight', fontsize=14, fontweight='bold')
 plt.ylabel('LogP', fontsize=14, fontweight='bold')
 plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0)
+plt.tight_layout()
 plt.show()
 plt.savefig(os.path.join(new_folder, f'{query}_plot_MW_vs_LogP.pdf'))
 
@@ -314,7 +328,7 @@ sns.boxplot(x='bioactivity_class', y='pIC50', data=df_2_class, hue='bioactivity_
 axs[0,0].set_xlabel('Bioactivity Class', fontsize=14, fontweight='bold')
 axs[0,0].set_ylabel('pIC50', fontsize=14, fontweight='bold')
 # axs[0,0].text(0.05, 0.95, f'MSE = {p_value:.2f}', 
-#             transform=axs[0].transAxes, fontsize=12, verticalalignment='top',
+#             transform=axs[0,0].transAxes, fontsize=12, verticalalignment='top',
 #             bbox=dict(boxstyle='round,pad=0.3', edgecolor='black', facecolor='white'))
 
 sns.boxplot(x='bioactivity_class', y='MW', data=df_2_class, hue='bioactivity_class', ax=axs[0,1])
@@ -337,6 +351,8 @@ sns.scatterplot(x='MW', y='LogP', size='pIC50', data=df_2_class, edgecolor='blac
 axs[1,2].set_xlabel('Molecular Weight', fontsize=14, fontweight='bold')
 axs[1,2].set_ylabel('LogP', fontsize=14, fontweight='bold')
 axs[1,2].legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0)
+plt.tight_layout()
+plt.show()
 
 
 
@@ -347,10 +363,12 @@ df_selection.to_csv(os.path.join(new_folder, f'{query}_{selected_target}_molecul
                     index=False, header=False)
 
 # Export path directory to .txt document to be read in by our BASH file which will run the PaDEL program
-with open(os.path.join('./PaDEL-Descriptor', 'output_dir.txt'), 'w') as f:
-    f.write(new_folder)
+# with open(os.path.join('./PaDEL-Descriptor', 'output_dir.txt'), 'w') as f:
+#     f.write(new_folder)
 
-#Run BASH file here############
+
+# Run the Bash script
+result = subprocess.run(['bash', os.path.join(master_dir, 'padel.sh')])
 
 # Import the generated fingerprints for all compounds in our data
 df_descriptors = pd.read_csv(os.path.join(new_folder, 'descriptors_output.csv'))
