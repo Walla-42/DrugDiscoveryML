@@ -10,37 +10,61 @@ from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
 from sklearn.feature_selection import VarianceThreshold
 from sklearn.metrics import r2_score, mean_squared_error
-import lazypredict
+# import lazypredict
 from collections import Counter
-from lazypredict.Supervised import LazyRegressor
+# from lazypredict.Supervised import LazyRegressor
 import  os
 from sklearn.tree import DecisionTreeRegressor
 
 def model_scoring(y_test, y_pred):
-    """ Calculates the statistics necessary to score a ML models performance
-    
-    Parameters:
-    ***********
+    """Calculates the statistics necessary to score a ML models performance
+
+    Parameters
+    ----------
     y_test : PD_array
+        Test values split from data using sklearn.train_test_split
     y_pred : PD_array
-    
-    Returns: 
-    *********
-    Statistics : Array of values coorisponding to MSE, R2, ASE"""
+        Predicted values generated from model.predict(X_test)
+
+    Returns
+    -------
+    Statistics : PD_series
+        Array of values coorisponding to MSE, R2, ASE
+
+    """
 
     from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 
-    MSE = mean_squared_error(y_test, y_pred)
-    R2 = r2_score(y_test, y_pred)
-    MAE = mean_absolute_error(y_test, y_pred)
+    MSE = float(round(mean_squared_error(y_test, y_pred),2))
+    R2 = float(round(r2_score(y_test, y_pred),2))
+    MAE = float(round(mean_absolute_error(y_test, y_pred),2))
 
     Statistics = [{'MSE' : MSE}, {'R2' : R2}, {'MAE' : MAE}]
 
     return Statistics
 
 def lipinski(smiles, verbose=False):
-    """Determines the lipinski descriptors for each molecule and creates a list 
-    containing each of the descriptors"""
+    """Determines the lipinski descriptors for each molecule and creates a list
+    containing each of the descriptors
+
+    Parameters
+    ----------
+    smiles : 1D_Array
+    verbose :
+         (Default value = False)
+
+    Returns
+    -------
+    Descriptors: PD_array
+            Array of values MolWt, MolLogP, NumHDonors, NumHAcceptors coorisponding to each
+        cannonical smile in the smiles array
+        
+        MolWt: int
+        MolLogP: int
+        NumHDonors: int
+        NumHAcceptors: int
+
+    """
     moldata=[]
     for elem in smiles:
         mol=Chem.MolFromSmiles(elem)
@@ -71,7 +95,19 @@ def lipinski(smiles, verbose=False):
 
 def pIC50(input):
     """Takes normalized standard values and converts them to the pIC50 for chemical analysis
-    further on in the program"""
+    further on in the program
+
+    Parameters
+    ----------
+    input : PD_dataframe
+        PD_dataframe with column 'standard_value_norm' generated from the function norm_value
+        
+
+    Returns
+    -------
+    x : Array pIC50 values of class float
+
+    """
 
     pIC50 = []
 
@@ -84,8 +120,19 @@ def pIC50(input):
     return x
 
 def norm_value(input):
-    """ Function to normalize all standard values greater than 1e6 to 1e6 as to not throw 
-    negative log values when calculating the IC50 value. """
+    """Function to normalize all standard values greater than 1e6 to 1e6 as to not throw
+    negative log values when calculating the IC50 value.
+
+    Parameters
+    ----------
+    input : PD_dataframe
+        Array with column 'standard_value' 
+
+    Returns
+    -------
+    x : input array with standard_value_norm column of class float
+
+    """
 
     norm = []
 
@@ -100,11 +147,13 @@ def norm_value(input):
 
 # Target search
 target = new_client.target
+
 # query = input('Target query:')
 query = 'Acetylcholinesterase'
 target_query = target.search(query)
 targets = pd.DataFrame.from_dict(target_query)
 print(targets)
+
 # selected_target = targets.target_chembl_id[int(input('Select Target Index:)'))]
 selected_target = targets.target_chembl_id[0]
 # print(selected_target)
@@ -115,19 +164,29 @@ res = activity.filter(target_chembl_id=selected_target).filter(standard_type='IC
 df = pd.DataFrame.from_dict(res)
 # print(df)
 
-# create new directory to save files for user per search
-# Note:  May need to add a condition here so that if a similar search query is used it doesn't overwrite the previous query results. 
 current_directory = os.getcwd()
 new_folder = os.path.join(current_directory, f'{query}_{selected_target}_drug_discovery')
 
 # Create the folder
-try:
-    os.makedirs(new_folder)
-    print(f"Folder '{new_folder}' created successfully.")
-except FileExistsError:
-    print(f"Folder '{new_folder}' already exists.")
-except Exception as e:
-    print(f"An error occurred: {e}")
+for i in range(11):
+    try:
+        if i == 0:
+            os.makedirs(new_folder)
+        else:
+            new_folder_with_suffix = os.path.join(current_directory, f"{query}_{selected_target}_drug_discovery_{i:02}")
+            os.makedirs(new_folder_with_suffix)
+            new_folder = new_folder_with_suffix
+        print(f"Folder '{new_folder}' created successfully.")
+        break 
+    except FileExistsError:
+        if i == 10:
+            print(f"All folder names '{query}_{selected_target}_drug_discovery' to '{query}_{selected_target}_drug_discovery_10' already exist.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        break
+
+# Export original data to csv
+df.to_csv(os.path.join(new_folder, f'{query}_01_Bioactivity_data.csv'), index=False)
 
 # process data and get rid of missing values in dataset
 df2 = pd.read_csv(os.path.join(new_folder, f'{query}_01_Bioactivity_data.csv'))
@@ -163,20 +222,34 @@ df_combined = pd.concat([df4, df_lipinski], axis=1)
 # print(df_combined)
 
 # calculate the pIC50 value utilizing the functions above
-# df_final = pIC50(norm_value(df_combined))
 df_norm = norm_value(df_combined)
 df_final = pIC50(df_norm)
-print(df_final.columns)
-# print(df_norm.isna().sum(), df_norm.describe())
-# print(df_final.isna().sum())
 
+# Export data with calculated pIC50 
 df_final.to_csv(os.path.join(new_folder,f'{query}_03_bioactivity_data_final_pIC50.csv'), index=False)
 
+# Isolate active and inactive compounds for exploratory analysis
 df_2_class = df_final[df_final['bioactivity_class'] != 'intermediate']
+
+# Export data with active and inactive compounds excluding intermediates
 df_2_class.to_csv(os.path.join(new_folder, f'{query}_04_bioactivity_data_2class.csv'), index=False)
-# print(df_2_class)
+
 
 def mannwhitney(descriptor, verbose=False):
+    """Calculates mannwhitneyu statistics for each descriptor against bioactivity class
+    for active and inactive compounds.
+
+    Parameters
+    ----------
+    descriptor :
+        
+    verbose :
+         (Default value = False)
+
+    Returns
+    -------
+
+    """
     from numpy.random import seed
     from numpy.random import randn
     from scipy.stats import mannwhitneyu
@@ -211,10 +284,11 @@ def mannwhitney(descriptor, verbose=False):
     results.to_csv(os.path.join(new_folder, filename))
     return results
 
-
+# Set graphical style for charts and graphs
 sns.set_palette('deep')
 sns.set_style("ticks")
 
+# Frequency of bioactivity class (active vs inactive)
 plt.figure(figsize=(5.5,5.5))
 sns.countplot(x='bioactivity_class', data=df_2_class, edgecolor='black', hue='bioactivity_class')
 plt.xlabel('Bioactivity Class', fontsize=14, fontweight='bold')
@@ -222,7 +296,7 @@ plt.ylabel('Frequency', fontsize=14, fontweight='bold')
 plt.show()
 plt.savefig(os.path.join(new_folder, f'{query}_plot_bioactivity_class.pdf'))
 
-# split data set into X and y for graphical analysis. We now have 2 classes which we can analyze against eachother. 
+# Molecular weight vs LogP of inactive and active compounds
 plt.figure(figsize=(5.5,5.5))
 sns.scatterplot(x='MW', y='LogP', size='pIC50', data=df_2_class, edgecolor='black', hue='bioactivity_class', alpha=0.7)
 plt.xlabel('Molecular Weight', fontsize=14, fontweight='bold')
@@ -233,6 +307,8 @@ plt.savefig(os.path.join(new_folder, f'{query}_plot_MW_vs_LogP.pdf'))
 
 p_value = mannwhitney('MW')['p']
 print(p_value)
+
+# Muliplot analysis of lipinski descriptors 
 fig, axs = plt.subplots(2,3, figsize=(18,10))
 sns.boxplot(x='bioactivity_class', y='pIC50', data=df_2_class, hue='bioactivity_class', ax= axs[0,0])
 axs[0,0].set_xlabel('Bioactivity Class', fontsize=14, fontweight='bold')
@@ -261,6 +337,8 @@ sns.scatterplot(x='MW', y='LogP', size='pIC50', data=df_2_class, edgecolor='blac
 axs[1,2].set_xlabel('Molecular Weight', fontsize=14, fontweight='bold')
 axs[1,2].set_ylabel('LogP', fontsize=14, fontweight='bold')
 axs[1,2].legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0)
+
+
 
 ###This Section is the ML Model. Need to use the bash file here to run the PaDel descriptors
 selection = ['canonical_smiles', 'molecule_chembl_id']
