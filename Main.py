@@ -306,7 +306,7 @@ sns.countplot(x='bioactivity_class', data=df_2_class, edgecolor='black', hue='bi
 plt.xlabel('Bioactivity Class', fontsize=14, fontweight='bold')
 plt.ylabel('Frequency', fontsize=14, fontweight='bold')
 plt.tight_layout()
-plt.show()
+# plt.show()
 plt.savefig(os.path.join(new_folder, f'{query}_plot_bioactivity_class.pdf'))
 
 # Molecular weight vs LogP of inactive and active compounds
@@ -316,7 +316,7 @@ plt.xlabel('Molecular Weight', fontsize=14, fontweight='bold')
 plt.ylabel('LogP', fontsize=14, fontweight='bold')
 plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0)
 plt.tight_layout()
-plt.show()
+# plt.show()
 plt.savefig(os.path.join(new_folder, f'{query}_plot_MW_vs_LogP.pdf'))
 
 p_value = mannwhitney('MW')['p']
@@ -352,7 +352,7 @@ axs[1,2].set_xlabel('Molecular Weight', fontsize=14, fontweight='bold')
 axs[1,2].set_ylabel('LogP', fontsize=14, fontweight='bold')
 axs[1,2].legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0)
 plt.tight_layout()
-plt.show()
+# plt.show()
 
 
 
