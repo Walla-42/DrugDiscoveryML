@@ -151,15 +151,14 @@ def norm_value(input):
 # Target search
 target = new_client.target
 
-# query = input('Target query:')
-query = 'Coronavirus'
+query = input('Target query:')
 target_query = target.search(query)
 targets = pd.DataFrame.from_dict(target_query)
+print(targets.columns)
 print(targets)
 
-# selected_target = targets.target_chembl_id[int(input('Select Target Index:)'))]
-selected_target = targets.target_chembl_id[6]
-# print(selected_target)
+selected_target = targets.target_chembl_id[int(input('Select Target Index:)'))]
+print(selected_target)
 
 # Select target protein
 activity = new_client.activity
@@ -353,10 +352,9 @@ axs[1,2].set_ylabel('LogP', fontsize=14, fontweight='bold')
 axs[1,2].legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0)
 plt.tight_layout()
 # plt.show()
+plt.savefig(os.path.join(new_folder, f'{query}_Master_plot.pdf'))
 
-
-
-###This Section is the ML Model. Need to use the bash file here to run the PaDel descriptors
+# Creating .smi folder to run in the PaDEL description software
 selection = ['canonical_smiles', 'molecule_chembl_id']
 df_selection = df_final[selection]
 df_selection.to_csv(os.path.join(new_folder, f'{query}_{selected_target}_molecule.smi'), sep='\t', \
@@ -370,15 +368,14 @@ os.makedirs(PaDEL_dir)
 with open(os.path.join(PaDEL_dir, 'output_dir.txt'), 'w') as f:
     f.write(new_folder)
 
-
 # Run the Bash script
 result = subprocess.run(['bash', os.path.join(master_dir, 'padel.sh')])
 
 # Import the generated fingerprints for all compounds in our data
 df_descriptors = pd.read_csv(os.path.join(new_folder, 'descriptors_output.csv'))
-# print(df_descriptors.columns)
 
-# Train the Model
+
+# ********************************************************************************** Machine Learning Model ************************************************************************
 
 df_X = df_descriptors.drop(columns='Name')
 print(df_X.shape)
